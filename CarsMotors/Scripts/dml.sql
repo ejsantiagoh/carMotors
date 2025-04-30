@@ -1,83 +1,69 @@
--- SUPPLIERS
--- Insertar información de proveedores
-INSERT INTO Supplier (name, nit, contact_info, supply_frequency) VALUES
-('AutoRepuestos S.A.', '800123456', 'autorpr@example.com', 'Weekly'),
-('Energía Total Ltda.', '900456789', 'baterias@example.com', 'Biweekly');
+-- Tabla: Dirección / Address
+INSERT INTO address (street, city) VALUES ('123 Main St', 'Springfield');
+INSERT INTO address (street, city) VALUES ('456 Elm St', 'Shelbyville');
+INSERT INTO address (street, city) VALUES ('789 Oak St', 'Ogdenville');
 
--- BATCHES
--- Insertar lotes de ingreso de repuestos
-INSERT INTO Batch (supplier_id, entry_date) VALUES
-(1, '2025-04-01'),
-(2, '2025-04-05');
+-- Tabla: Cliente / Customer
+INSERT INTO customer (name, identification, phone, email, address_id)
+VALUES ('John Doe', '12345678', '555-1234', 'john@example.com', 1),
+       ('Jane Smith', '87654321', '555-5678', 'jane@example.com', 2);
 
--- SPARE PARTS
--- Insertar repuestos con detalles
-INSERT INTO SparePart (name, type, brand, model, supplier_id, stock_quantity, minimum_stock, entry_date, estimated_lifespan, status, batch_id) VALUES
-('Filtro de Aceite', 'Consumable', 'Toyota', 'Corolla', 1, 20, 5, '2025-04-01', 365, 'Available', 1),
-('Batería 12V', 'Electrical', 'General', '2.5', 1, 15, 3, '2025-03-20', 730, 'Available', 1),
-('Pastillas de Freno', 'Mechanical', 'Mazda', '3', 1, 10, 2, '2025-04-15', 365, 'Available', 1),
-('Aceite 10W40', 'Consumable', 'General', '2', 2, 50, 10, '2025-04-10', 540, 'Available', 2),
-('Espejo Lateral', 'Bodywork', 'Chevrolet', 'Spark', 1, 5, 2, '2025-04-05', 730, 'Available', 1);
+-- Tabla: Vehículo / Vehicle
+INSERT INTO vehicle (brand, model, plate, customer_id)
+VALUES ('Toyota', 'Corolla', 'ABC123', 1),
+       ('Ford', 'Focus', 'XYZ789', 2);
 
--- CUSTOMERS
--- Insertar datos de clientes
-INSERT INTO Customer (name, identification, phone, email, address) VALUES
-('Carlos Ramírez', '1098765432', '3104567890', 'carlos.ramirez@mail.com', 'Calle 123 #45-67'),
-('Ana Martínez', '1081234567', '3139876543', 'ana.martinez@mail.com', 'Carrera 45 #78-90'),
-('Luis Torres', '1076543210', '3117896541', 'luis.torres@mail.com', 'Av. Siempre Viva 742');
+-- Tabla: Técnico / Technician
+INSERT INTO technician (name, specialty)
+VALUES ('Alice Johnson', 'Engine'),
+       ('Bob Brown', 'Transmission');
 
--- VEHICLES
--- Insertar vehículos asociados a los clientes
-INSERT INTO Vehicle (brand, model, plate, type, customer_id) VALUES
-('Toyota', 'Corolla', 'ABC123', 'Sedan', 1),
-('Chevrolet', 'Spark', 'XYZ789', 'Hatchback', 2),
-('Mazda', '3', 'LMN456', 'Sedan', 3);
+-- Tabla: Servicio / Service
+INSERT INTO service (type, vehicle_id, description, estimated_time, labor_cost, status)
+VALUES ('Oil Change', 1, 'Routine oil change', 2, 50.00, 'Pending'),
+       ('Brake Repair', 2, 'Front brake pads replacement', 3, 150.00, 'Completed');
 
--- SERVICES
--- Insertar servicios realizados
-INSERT INTO Service (type, vehicle_id, description, estimated_time, labor_cost, status) VALUES
-('Preventive', 1, 'Cambio de aceite y revisión general', '02:00:00', 60000.00, 'Completed'),
-('Corrective', 2, 'Reemplazo de espejo lateral', '01:30:00', 45000.00, 'Delivered');
+-- Tabla: Servicio-Técnico / Service-Technician
+INSERT INTO service_technician (service_id, technician_id)
+VALUES (1, 1),
+       (2, 2);
 
--- SERVICE DETAILS
--- Insertar repuestos utilizados en los servicios
-INSERT INTO ServiceDetail (service_id, spare_part_id, quantity_used) VALUES
-(1, 1, 1),
-(1, 4, 2),
-(2, 5, 1);
+-- Tabla: Recordatorio / Reminder
+INSERT INTO reminder (customer_id, vehicle_id, reminder_date, description, status)
+VALUES (1, 1, CURDATE(), 'Next oil change', 'Active'),
+       (2, 2, CURDATE() + INTERVAL 30 DAY, 'Annual inspection', 'Scheduled');
 
--- INVOICES
--- Insertar facturas generadas
-INSERT INTO Invoice (service_id, customer_id, date, subtotal, tax, total, cufe_code, qr_code_url, pdf_url) VALUES
-(1, 1, '2025-04-27', 60000.00, 11400.00, 71400.00, 'cufe1234567890', 'https://dian.gov.co/factura/F001-0001', 'https://dian.gov.co/factura/F001-0001.pdf'),
-(2, 2, '2025-04-28', 45000.00, 8550.00, 53550.00, 'cufe1234567891', 'https://dian.gov.co/factura/F001-0002', 'https://dian.gov.co/factura/F001-0002.pdf');
+-- Tabla: Proveedor / Supplier
+INSERT INTO supplier (name, nit, contact_info, supply_frequency)
+VALUES ('AutoParts Inc.', '900123', 'contact@autoparts.com', 'Monthly'),
+       ('BrakeWorld', '900456', 'support@brakeworld.com', 'Biweekly');
 
--- CAMPAIGNS
--- Insertar campañas promocionales
-INSERT INTO Campaign (name, description, discount_percentage, start_date, end_date) VALUES
-('Descuento Frenos', 'Campaña de descuento en frenos', 15.00, '2025-05-01', '2025-05-31'),
-('Chequeo Gratis', 'Revisión gratis para clientes nuevos', 100.00, '2025-06-01', '2025-06-15');
+-- Tabla: Lote / Batch
+INSERT INTO batch (supplier_id, entry_date)
+VALUES (1, CURDATE() - INTERVAL 5 DAY),
+       (2, CURDATE());
 
--- INSPECTIONS
--- Insertar registros de inspecciones a vehículos
-INSERT INTO Inspection (vehicle_id, inspection_date, result, next_inspection_date) VALUES
-(1, '2025-04-25', 'Approved', '2026-04-25'),
-(2, '2025-04-26', 'Repair_needed', '2025-05-26');
+-- Tabla: Repuesto / Spare Part
+INSERT INTO spare_part (name, type, brand, model, supplier_id, stock_quantity, minimum_stock, estimated_lifespan, status, batch_id)
+VALUES ('Oil Filter', 'Filter', 'Bosch', 'OF123', 1, 50, 10, 180, 'Available', 1),
+       ('Brake Pad', 'Brake', 'Brembo', 'BP456', 2, 30, 5, 365, 'Available', 2);
 
--- SUPPLIER EVALUATIONS
--- Insertar evaluaciones de proveedores
-INSERT INTO SupplierEvaluation (supplier_id, punctuality_score, quality_score, cost_score, evaluation_date) VALUES
-(1, 8, 9, 7, '2025-04-20'),
-(2, 9, 8, 8, '2025-04-22');
+-- Tabla: Evaluación de Proveedor / Supplier Evaluation
+INSERT INTO supplier_evaluation (supplier_id, punctuality_score, quality_score, cost_score, evaluation_date)
+VALUES (1, 5, 4, 4, CURDATE()),
+       (2, 4, 5, 5, CURDATE());
 
--- CAMPAIGN VEHICLE
--- Insertar asignaciones de campañas a vehículos
-INSERT INTO CampaignVehicle (campaign_id, vehicle_id, assigned_date) VALUES
-(1, 1, '2025-05-01'),
-(2, 3, '2025-06-01');
+-- Tabla: Detalle del Servicio / Service Detail
+INSERT INTO service_detail (service_id, spare_part_id, quantity_used)
+VALUES (1, 1, 1),
+       (2, 2, 2);
 
--- REMINDERS
--- Insertar recordatorios programados
-INSERT INTO Reminder (customer_id, vehicle_id, reminder_date, description, status) VALUES
-(1, 1, '2025-06-01', 'Recordatorio para cambio de aceite', 'Pending'),
-(3, 3, '2025-06-10', 'Recordatorio revisión general', 'Pending');
+-- Tabla: Factura / Invoice
+INSERT INTO invoice (service_id, customer_id, date, subtotal, tax, total, cufe_code, qr_code_url, pdf_url)
+VALUES (1, 1, CURDATE(), 50.00, 9.50, 59.50, 'CUFE123', 'http://example.com/qr1.png', 'http://example.com/invoice1.pdf'),
+       (2, 2, CURDATE(), 150.00, 28.50, 178.50, 'CUFE456', 'http://example.com/qr2.png', 'http://example.com/invoice2.pdf');
+
+-- Tabla: Detalle de Factura / Invoice Detail
+INSERT INTO invoice_detail (invoice_id, spare_part_id, quantity, price)
+VALUES (1, 1, 1, 50.00),
+       (2, 2, 1, 150.00);

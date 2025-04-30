@@ -1,4 +1,4 @@
-USE CarMotors;
+use hola;
 
 -- Table for Address
 CREATE TABLE address (
