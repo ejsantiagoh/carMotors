@@ -30,14 +30,14 @@ public class DatabaseConnection {
             this.password = props.getProperty("db.password");
 
             if (url == null || username == null || password == null) {
-                throw new IllegalArgumentException("Faltan propiedades obligatorias en config/local.properties: db.url, db.username o db.password");
+                throw new IllegalArgumentException("Faltan propiedades obligatorias en config/database.properties: db.url, db.username o db.password");
             }
 
             this.connection = DriverManager.getConnection(url, username, password);
             logger.info("Conexión a la base de datos establecida correctamente con URL: {}", url);
         } catch (IOException e) {
-            logger.error("Error al leer el archivo config/local.properties: {}", e.getMessage(), e);
-            throw new RuntimeException("No se pudo leer config/local.properties: " + e.getMessage(), e);
+            logger.error("Error al leer el archivo config/database.properties: {}", e.getMessage(), e);
+            throw new RuntimeException("No se pudo leer config/database.properties: " + e.getMessage(), e);
         } catch (SQLException e) {
             logger.error("Error al establecer la conexión a la base de datos: {}", e.getMessage(), e);
             throw new RuntimeException("Error al conectar a la base de datos: " + e.getMessage(), e);
