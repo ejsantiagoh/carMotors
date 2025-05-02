@@ -1,3 +1,5 @@
+USE CarMotors;
+
 -- Tabla: Dirección / Address
 INSERT INTO address (street, city) VALUES ('123 Main St', 'Springfield');
 INSERT INTO address (street, city) VALUES ('456 Elm St', 'Shelbyville');
