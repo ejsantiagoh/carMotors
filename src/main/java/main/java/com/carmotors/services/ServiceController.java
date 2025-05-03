@@ -4,58 +4,33 @@
  */
 package main.java.com.carmotors.services;
 
-import main.java.com.carmotors.customers.CustomerManager;
-import main.java.com.carmotors.invoicing.InvoiceManager;
-import java.util.List;
 import javax.swing.JOptionPane;
-import main.java.com.carmotors.customers.Customer;
-import main.java.com.carmotors.invoicing.Invoice;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
  * @author fashe
  */
 
-
 public class ServiceController {
     private final ServiceManager serviceManager;
-    private final CustomerManager customerManager;
-    private final InvoiceManager invoiceManager;
     private final ServiceView serviceView;
+    private final DefaultTableModel tableModel;
 
-    public ServiceController(ServiceManager serviceManager, CustomerManager customerManager, InvoiceManager invoiceManager, ServiceView serviceView) {
+    public ServiceController(ServiceManager serviceManager, ServiceView serviceView, DefaultTableModel tableModel) {
         this.serviceManager = serviceManager;
-        this.customerManager = customerManager;
-        this.invoiceManager = invoiceManager;
         this.serviceView = serviceView;
+        this.tableModel = tableModel;
+        //serviceManager.setDisplayArea(null); // No usamos JTextArea, usamos tableModel
         initController();
     }
 
     private void initController() {
-        serviceView.getListServiceButton().addActionListener(e -> {
+        serviceView.getRefreshButton().addActionListener(e -> {
             try {
-                List<Service> services = serviceManager.listServices();
-                serviceView.displayServices(services);
+                serviceManager.refreshServiceList(tableModel);
             } catch (RuntimeException ex) {
-                JOptionPane.showMessageDialog(serviceView, "Error al listar servicios: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        });
-
-        serviceView.getListCustomerButton().addActionListener(e -> {
-            try {
-                List<Customer> customers = customerManager.listCustomers();
-                serviceView.displayCustomers(customers);
-            } catch (RuntimeException ex) {
-                JOptionPane.showMessageDialog(serviceView, "Error al listar clientes: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        });
-
-        serviceView.getListInvoiceButton().addActionListener(e -> {
-            try {
-                List<Invoice> invoices = invoiceManager.listInvoices();
-                serviceView.displayInvoices(invoices);
-            } catch (RuntimeException ex) {
-                JOptionPane.showMessageDialog(serviceView, "Error al listar facturas: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Error al listar servicios: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
     }

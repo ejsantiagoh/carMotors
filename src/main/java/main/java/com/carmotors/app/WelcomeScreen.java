@@ -1,83 +1,96 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package main.java.com.carmotors.app;
 
+import main.java.com.carmotors.customers.CustomerController;
 import main.java.com.carmotors.customers.CustomerManager;
+import main.java.com.carmotors.customers.CustomerView;
+import main.java.com.carmotors.invoicing.InvoiceController;
 import main.java.com.carmotors.invoicing.InvoiceManager;
-import main.java.com.carmotors.services.*;
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import main.java.com.carmotors.invoicing.InvoiceView;
+import main.java.com.carmotors.services.ServiceController;
+import main.java.com.carmotors.services.ServiceManager;
+import main.java.com.carmotors.services.ServiceView;
 
-/**
- *
- * @author fashe
- */
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
 
 public class WelcomeScreen {
     private JFrame frame;
     private CardLayout cardLayout;
     private JPanel cardPanel;
     private ServiceView serviceView;
+    private CustomerView customerView;
+    private InvoiceView invoiceView;
     private CustomerManager customerManager;
     private InvoiceManager invoiceManager;
+    private ServiceManager serviceManager;
+    private CustomerController customerController;
+    private InvoiceController invoiceController;
+    private ServiceController serviceController;
 
     public WelcomeScreen() {
         frame = new JFrame("CarMotors - Gestión de Servicios");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 600);
+        frame.setLocationRelativeTo(null);
 
         cardLayout = new CardLayout();
         cardPanel = new JPanel(cardLayout);
 
-        // Inicializar managers y view
+        // Inicializar managers y vistas
         serviceView = new ServiceView();
+        customerView = new CustomerView();
+        invoiceView = new InvoiceView();
         customerManager = new CustomerManager();
         invoiceManager = new InvoiceManager();
-        new ServiceController(new ServiceManager(), customerManager, invoiceManager, serviceView);
+        serviceManager = new ServiceManager();
 
         // Pantalla de bienvenida
         JPanel welcomePanel = createWelcomePanel();
         cardPanel.add(welcomePanel, "welcome");
 
-        // Añadir panel de servicios
-        cardPanel.add(serviceView, "services");
+        // Añadir paneles
+        JPanel servicePanel = createServicePanel();
+        cardPanel.add(servicePanel, "services");
 
-        // Panel de clientes
         JPanel customerPanel = createCustomerPanel();
         cardPanel.add(customerPanel, "customers");
 
-        // Panel de facturas
         JPanel invoicePanel = createInvoicePanel();
         cardPanel.add(invoicePanel, "invoices");
 
         frame.add(cardPanel, BorderLayout.CENTER);
-        frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
 
     private JPanel createWelcomePanel() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(new Color(240, 240, 240));
+        JPanel panel = new JPanel(new BorderLayout()) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2d = (Graphics2D) g;
+                GradientPaint gp = new GradientPaint(0, 0, new Color(0, 120, 215), 0, getHeight(), new Color(0, 60, 120));
+                g2d.setPaint(gp);
+                g2d.fillRect(0, 0, getWidth(), getHeight());
+            }
+        };
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         JLabel titleLabel = new JLabel("Bienvenido a CarMotors", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        titleLabel.setForeground(new Color(0, 102, 204));
+        titleLabel.setForeground(Color.WHITE);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
         panel.add(titleLabel, BorderLayout.NORTH);
 
         JLabel descriptionLabel = new JLabel("<html><center>Gestión de Servicios Automotrices<br>Seleccione una sección para comenzar</center></html>", SwingConstants.CENTER);
+        descriptionLabel.setForeground(Color.WHITE);
         descriptionLabel.setFont(new Font("Arial", Font.PLAIN, 16));
         panel.add(descriptionLabel, BorderLayout.CENTER);
 
-        JPanel buttonPanel = new JPanel(new GridLayout(3, 1, 10, 10));
-        buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        JPanel buttonPanel = new JPanel(new GridLayout(3, 1, 10, 20));
+        buttonPanel.setOpaque(false);
 
-        JButton servicesButton = new JButton("Ir a Servicios");
-        JButton customersButton = new JButton("Ir a Clientes");
-        JButton invoicesButton = new JButton("Ir a Facturas");
+        JButton servicesButton = createStyledButton("Gestión de Servicios");
+        JButton customersButton = createStyledButton("Gestión de Clientes");
+        JButton invoicesButton = createStyledButton("Gestión de Facturas");
 
         servicesButton.addActionListener(e -> cardLayout.show(cardPanel, "services"));
         customersButton.addActionListener(e -> cardLayout.show(cardPanel, "customers"));
@@ -91,6 +104,43 @@ public class WelcomeScreen {
         return panel;
     }
 
+    private JPanel createServicePanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(new Color(255, 240, 240));
+
+        JLabel title = new JLabel("Gestión de Servicios", SwingConstants.CENTER);
+        title.setFont(new Font("Arial", Font.BOLD, 20));
+        panel.add(title, BorderLayout.NORTH);
+
+        String[] columnNames = {"ID", "Tipo", "Vehículo ID", "Descripción", "Tiempo Estimado (horas)", "Costo Labor ($)", "Estado"};
+        DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
+        JTable table = new JTable(tableModel);
+        table.setFillsViewportHeight(true);
+        table.setFont(new Font("Arial", Font.PLAIN, 12));
+        table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        serviceController = new ServiceController(serviceManager, serviceView, tableModel);
+
+        JButton backButton = createStyledButton("Regresar");
+        backButton.addActionListener(e -> cardLayout.show(cardPanel, "welcome"));
+
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        if (serviceView != null && serviceView.getRefreshButton() != null) {
+            buttonPanel.add(serviceView.getRefreshButton());
+        } else {
+            JButton placeholder = new JButton("Actualizar Servicios (Error)");
+            placeholder.setEnabled(false);
+            buttonPanel.add(placeholder);
+        }
+        buttonPanel.add(backButton);
+        panel.add(buttonPanel, BorderLayout.SOUTH);
+
+        return panel;
+    }
+
     private JPanel createCustomerPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(new Color(240, 255, 240));
@@ -99,27 +149,29 @@ public class WelcomeScreen {
         title.setFont(new Font("Arial", Font.BOLD, 20));
         panel.add(title, BorderLayout.NORTH);
 
-        JTextArea info = new JTextArea("Aquí puedes listar y gestionar la información de los clientes.\n" +
-                                      "Ejemplo: John Doe, Jane Smith.\n" +
-                                      "Haz clic en 'Listar Clientes' para ver los datos.");
-        info.setEditable(false);
-        info.setFont(new Font("Arial", Font.PLAIN, 14));
-        info.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        panel.add(new JScrollPane(info), BorderLayout.CENTER);
+        String[] columnNames = {"ID", "Nombre", "Identificación", "Teléfono", "Email", "Dirección"};
+        DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
+        JTable table = new JTable(tableModel);
+        table.setFillsViewportHeight(true);
+        table.setFont(new Font("Arial", Font.PLAIN, 12));
+        table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        panel.add(scrollPane, BorderLayout.CENTER);
 
-        JButton listButton = new JButton("Listar Clientes");
-        listButton.addActionListener(e -> {
-            try {
-                serviceView.displayCustomers(customerManager.listCustomers());
-            } catch (RuntimeException ex) {
-                JOptionPane.showMessageDialog(frame, "Error al listar clientes: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        });
-        JButton backButton = new JButton("Regresar");
+        customerController = new CustomerController(customerManager, customerView, tableModel);
+
+        JButton backButton = createStyledButton("Regresar");
         backButton.addActionListener(e -> cardLayout.show(cardPanel, "welcome"));
 
         JPanel buttonPanel = new JPanel(new FlowLayout());
-        buttonPanel.add(listButton);
+        if (customerView != null && customerView.getRefreshButton() != null) {
+            buttonPanel.add(customerView.getRefreshButton());
+        } else {
+            JButton placeholder = new JButton("Actualizar Clientes (Error)");
+            placeholder.setEnabled(false);
+            buttonPanel.add(placeholder);
+        }
         buttonPanel.add(backButton);
         panel.add(buttonPanel, BorderLayout.SOUTH);
 
@@ -134,31 +186,44 @@ public class WelcomeScreen {
         title.setFont(new Font("Arial", Font.BOLD, 20));
         panel.add(title, BorderLayout.NORTH);
 
-        JTextArea info = new JTextArea("Aquí puedes listar y gestionar las facturas generadas.\n" +
-                                      "Ejemplo: Facturas con subtotal, impuestos y total.\n" +
-                                      "Haz clic en 'Listar Facturas' para ver los datos.");
-        info.setEditable(false);
-        info.setFont(new Font("Arial", Font.PLAIN, 14));
-        info.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        panel.add(new JScrollPane(info), BorderLayout.CENTER);
+        String[] columnNames = {"ID", "Cliente ID", "Servicio ID", "Fecha", "Subtotal ($)", "Impuesto ($)", "Total ($)", "CUFE", "QR", "PDF"};
+        DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
+        JTable table = new JTable(tableModel);
+        table.setFillsViewportHeight(true);
+        table.setFont(new Font("Arial", Font.PLAIN, 12));
+        table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        panel.add(scrollPane, BorderLayout.CENTER);
 
-        JButton listButton = new JButton("Listar Facturas");
-        listButton.addActionListener(e -> {
-            try {
-                serviceView.displayInvoices(invoiceManager.listInvoices());
-            } catch (RuntimeException ex) {
-                JOptionPane.showMessageDialog(frame, "Error al listar facturas: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        });
-        JButton backButton = new JButton("Regresar");
+        invoiceController = new InvoiceController(invoiceManager, invoiceView, tableModel);
+
+        JButton backButton = createStyledButton("Regresar");
         backButton.addActionListener(e -> cardLayout.show(cardPanel, "welcome"));
 
         JPanel buttonPanel = new JPanel(new FlowLayout());
-        buttonPanel.add(listButton);
+        if (invoiceView != null && invoiceView.getRefreshButton() != null) {
+            buttonPanel.add(invoiceView.getRefreshButton());
+        } else {
+            JButton placeholder = new JButton("Actualizar Facturas (Error)");
+            placeholder.setEnabled(false);
+            buttonPanel.add(placeholder);
+        }
         buttonPanel.add(backButton);
         panel.add(buttonPanel, BorderLayout.SOUTH);
 
         return panel;
+    }
+
+    private JButton createStyledButton(String text) {
+        JButton button = new JButton(text);
+        button.setBackground(new Color(0, 120, 215));
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setFont(new Font("Arial", Font.BOLD, 16));
+        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        return button;
     }
 
     public static void main(String[] args) {

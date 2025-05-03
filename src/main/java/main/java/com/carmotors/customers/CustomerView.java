@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package main.java.com.carmotors.services;
+package main.java.com.carmotors.customers;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
@@ -16,26 +16,27 @@ import javax.swing.JTextArea;
  * @author fashe
  */
 
-public class ServiceView extends JPanel {
-    private JTextArea serviceList;
+
+public class CustomerView extends JPanel {
+    private JTextArea customerList;
     private JButton refreshButton;
 
-    public ServiceView() {
+    public CustomerView() {
         setLayout(new BorderLayout());
 
-        serviceList = new JTextArea(10, 50);
-        serviceList.setEditable(false);
-        JScrollPane scrollPane = new JScrollPane(serviceList);
+        customerList = new JTextArea(10, 50);
+        customerList.setEditable(false);
+        JScrollPane scrollPane = new JScrollPane(customerList);
         add(scrollPane, BorderLayout.CENTER);
 
         JPanel buttonPanel = new JPanel(new GridLayout(1, 1));
-        refreshButton = new JButton("Actualizar Servicios");
+        refreshButton = new JButton("Actualizar Clientes");
         buttonPanel.add(refreshButton);
         add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    public void setServiceList(String services) {
-        serviceList.setText(services);
+    public void setCustomerList(String customers) {
+        customerList.setText(customers);
     }
 
     public JButton getRefreshButton() {

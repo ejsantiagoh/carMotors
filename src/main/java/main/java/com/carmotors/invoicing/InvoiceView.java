@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package main.java.com.carmotors.services;
+package main.java.com.carmotors.invoicing;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
@@ -16,26 +16,27 @@ import javax.swing.JTextArea;
  * @author fashe
  */
 
-public class ServiceView extends JPanel {
-    private JTextArea serviceList;
+
+public class InvoiceView extends JPanel {
+    private JTextArea invoiceList;
     private JButton refreshButton;
 
-    public ServiceView() {
+    public InvoiceView() {
         setLayout(new BorderLayout());
 
-        serviceList = new JTextArea(10, 50);
-        serviceList.setEditable(false);
-        JScrollPane scrollPane = new JScrollPane(serviceList);
+        invoiceList = new JTextArea(10, 50);
+        invoiceList.setEditable(false);
+        JScrollPane scrollPane = new JScrollPane(invoiceList);
         add(scrollPane, BorderLayout.CENTER);
 
         JPanel buttonPanel = new JPanel(new GridLayout(1, 1));
-        refreshButton = new JButton("Actualizar Servicios");
+        refreshButton = new JButton("Actualizar Facturas");
         buttonPanel.add(refreshButton);
         add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    public void setServiceList(String services) {
-        serviceList.setText(services);
+    public void setInvoiceList(String invoices) {
+        invoiceList.setText(invoices);
     }
 
     public JButton getRefreshButton() {
