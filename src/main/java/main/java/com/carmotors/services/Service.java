@@ -26,6 +26,8 @@ public class Service {
         this.id = id;
     }
 
+    // Otros getters y setters...
+
     public String getType() {
         return type;
     }
