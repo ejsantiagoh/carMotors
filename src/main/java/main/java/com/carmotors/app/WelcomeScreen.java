@@ -9,6 +9,12 @@ import main.java.com.carmotors.invoicing.InvoiceView;
 import main.java.com.carmotors.services.ServiceController;
 import main.java.com.carmotors.services.ServiceManager;
 import main.java.com.carmotors.services.ServiceView;
+import main.java.com.carmotors.inventory.SparePartView;
+import main.java.com.carmotors.inventory.SparePartController;
+import main.java.com.carmotors.inventory.SparePartDAO;
+import main.java.com.carmotors.suppliers.SupplierView;
+import main.java.com.carmotors.suppliers.SupplierController;
+import main.java.com.carmotors.suppliers.SupplierDAO;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -21,12 +27,18 @@ public class WelcomeScreen {
     private ServiceView serviceView;
     private CustomerView customerView;
     private InvoiceView invoiceView;
+    private SparePartView inventoryView;
+    private SupplierView supplierView;
     private CustomerManager customerManager;
     private InvoiceManager invoiceManager;
     private ServiceManager serviceManager;
     private CustomerController customerController;
     private InvoiceController invoiceController;
     private ServiceController serviceController;
+    private SparePartController sparePartController;
+    private SupplierController supplierController;
+    private SparePartDAO sparePartDAO;
+    private SupplierDAO supplierDAO;
 
     public WelcomeScreen() {
         frame = new JFrame("CarMotors - Gestión de Servicios");
@@ -37,13 +49,24 @@ public class WelcomeScreen {
         cardLayout = new CardLayout();
         cardPanel = new JPanel(cardLayout);
 
-        // Inicializar managers y vistas
+        // Inicializar managers, vistas y DAO
         serviceView = new ServiceView();
         customerView = new CustomerView();
         invoiceView = new InvoiceView();
+        inventoryView = new SparePartView();
+        supplierView = new SupplierView();
         customerManager = new CustomerManager();
         invoiceManager = new InvoiceManager();
         serviceManager = new ServiceManager();
+        sparePartDAO = new SparePartDAO();
+        supplierDAO = new SupplierDAO();
+
+        // Inicializar controladores
+        serviceController = new ServiceController(serviceManager, serviceView, new DefaultTableModel());
+        customerController = new CustomerController(customerManager, customerView, new DefaultTableModel());
+        invoiceController = new InvoiceController(invoiceManager, invoiceView, new DefaultTableModel());
+        sparePartController = new SparePartController(inventoryView, sparePartDAO); // Inicializar con DAO
+        supplierController = new SupplierController(supplierView, supplierDAO);    // Inicializar con DAO
 
         // Pantalla de bienvenida
         JPanel welcomePanel = createWelcomePanel();
@@ -58,6 +81,12 @@ public class WelcomeScreen {
 
         JPanel invoicePanel = createInvoicePanel();
         cardPanel.add(invoicePanel, "invoices");
+
+        JPanel inventoryPanel = createInventoryPanel();
+        cardPanel.add(inventoryPanel, "inventory");
+
+        JPanel suppliersPanel = createSuppliersPanel();
+        cardPanel.add(suppliersPanel, "suppliers");
 
         frame.add(cardPanel, BorderLayout.CENTER);
         frame.setVisible(true);
@@ -85,20 +114,34 @@ public class WelcomeScreen {
         descriptionLabel.setFont(new Font("Arial", Font.PLAIN, 16));
         panel.add(descriptionLabel, BorderLayout.CENTER);
 
-        JPanel buttonPanel = new JPanel(new GridLayout(3, 1, 10, 20));
+        JPanel buttonPanel = new JPanel(new GridLayout(5, 1, 10, 20));
         buttonPanel.setOpaque(false);
 
         JButton servicesButton = createStyledButton("Gestión de Servicios");
         JButton customersButton = createStyledButton("Gestión de Clientes");
         JButton invoicesButton = createStyledButton("Gestión de Facturas");
+        JButton inventoryButton = createStyledButton("Gestión de Inventario");
+        JButton suppliersButton = createStyledButton("Gestión de Proveedores");
 
         servicesButton.addActionListener(e -> cardLayout.show(cardPanel, "services"));
         customersButton.addActionListener(e -> cardLayout.show(cardPanel, "customers"));
         invoicesButton.addActionListener(e -> cardLayout.show(cardPanel, "invoices"));
+        inventoryButton.addActionListener(e -> {
+            inventoryView = new SparePartView();
+            inventoryView.setVisible(true);
+            cardLayout.show(cardPanel, "inventory");
+        });
+        suppliersButton.addActionListener(e -> {
+            supplierView = new SupplierView();
+            supplierView.setVisible(true);
+            cardLayout.show(cardPanel, "suppliers");
+        });
 
         buttonPanel.add(servicesButton);
         buttonPanel.add(customersButton);
         buttonPanel.add(invoicesButton);
+        buttonPanel.add(inventoryButton);
+        buttonPanel.add(suppliersButton);
 
         panel.add(buttonPanel, BorderLayout.SOUTH);
         return panel;
@@ -209,6 +252,64 @@ public class WelcomeScreen {
             placeholder.setEnabled(false);
             buttonPanel.add(placeholder);
         }
+        buttonPanel.add(backButton);
+        panel.add(buttonPanel, BorderLayout.SOUTH);
+
+        return panel;
+    }
+
+    private JPanel createInventoryPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(new Color(255, 255, 240));
+
+        JLabel title = new JLabel("Gestión de Inventario", SwingConstants.CENTER);
+        title.setFont(new Font("Arial", Font.BOLD, 20));
+        panel.add(title, BorderLayout.NORTH);
+
+        // Envolver el JFrame en un JPanel para integrarlo al CardLayout
+        JPanel wrapperPanel = new JPanel(new BorderLayout());
+        inventoryView.setVisible(true);
+        inventoryView.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // Evitar que cierre la aplicación
+        wrapperPanel.add(inventoryView.getContentPane(), BorderLayout.CENTER);
+
+        panel.add(wrapperPanel, BorderLayout.CENTER);
+
+        JButton backButton = createStyledButton("Regresar");
+        backButton.addActionListener(e -> {
+            cardLayout.show(cardPanel, "welcome");
+            inventoryView.dispose(); // Liberar recursos al volver
+        });
+
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        buttonPanel.add(backButton);
+        panel.add(buttonPanel, BorderLayout.SOUTH);
+
+        return panel;
+    }
+
+    private JPanel createSuppliersPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(new Color(240, 255, 255));
+
+        JLabel title = new JLabel("Gestión de Proveedores", SwingConstants.CENTER);
+        title.setFont(new Font("Arial", Font.BOLD, 20));
+        panel.add(title, BorderLayout.NORTH);
+
+        // Envolver el JFrame en un JPanel para integrarlo al CardLayout
+        JPanel wrapperPanel = new JPanel(new BorderLayout());
+        supplierView.setVisible(true);
+        supplierView.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // Evitar que cierre la aplicación
+        wrapperPanel.add(supplierView.getContentPane(), BorderLayout.CENTER);
+
+        panel.add(wrapperPanel, BorderLayout.CENTER);
+
+        JButton backButton = createStyledButton("Regresar");
+        backButton.addActionListener(e -> {
+            cardLayout.show(cardPanel, "welcome");
+            supplierView.dispose(); // Liberar recursos al volver
+        });
+
+        JPanel buttonPanel = new JPanel(new FlowLayout());
         buttonPanel.add(backButton);
         panel.add(buttonPanel, BorderLayout.SOUTH);
 
