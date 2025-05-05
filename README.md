@@ -32,3 +32,18 @@ Automotive service management system.
 - Implemented `services`, `customers`, and `invoicing` with schema corrections.
 - Created `WelcomeScreen.java` with `CardLayout` for navigation between sections.
 - Integrated `SparePartView` and `SupplierView` into `WelcomeScreen.java` with their controllers and DAO.
+
+### Day 3 (Laia)
+- Enhanced `SupplierDAO` and `SparePartDAO` to include CRUD operations (Create, Read, Update, Delete) for better data management.
+- Implemented `CombinedInventoryController` to synchronize supplier and spare parts data in `CombinedInventoryView`.
+- Added input validation in `SparePartView` and `SupplierView` to prevent invalid data entries (e.g., negative quantities or empty fields).
+- Updated ER Diagram to reflect new relationships between `suppliers`, `spare_parts`, and `inventory` tables.
+- Resolved minor Git merge conflicts and ensured consistent commit messages for better project tracking.
+
+### Day 4 (Laia)
+- Developed `InventoryManagementService` to handle stock updates and low-stock alerts for spare parts.
+- Integrated `InventoryManagementService` with `CombinedInventoryView` to display real-time stock levels.
+- Added search and filter functionality to `SparePartView` for easier navigation of large datasets.
+- Optimized database queries in `SparePartDAO` to improve performance for large inventories.
+- Updated `docs/classes.md` with new service and controller classes and documented their responsibilities.
+- Conducted testing on supplier and spare parts modules, fixing bugs related to data persistence and UI updates.

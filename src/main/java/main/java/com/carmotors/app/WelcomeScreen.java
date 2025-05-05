@@ -17,8 +17,14 @@ import main.java.com.carmotors.suppliers.SupplierController;
 import main.java.com.carmotors.suppliers.SupplierDAO;
 
 import javax.swing.*;
+import javax.swing.border.AbstractBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.geom.RoundRectangle2D;
+
+import static javax.swing.SwingConstants.*;
 
 public class WelcomeScreen {
     private JFrame frame;
@@ -53,20 +59,17 @@ public class WelcomeScreen {
         serviceView = new ServiceView();
         customerView = new CustomerView();
         invoiceView = new InvoiceView();
-        inventoryView = new SparePartView();
-        supplierView = new SupplierView();
         customerManager = new CustomerManager();
         invoiceManager = new InvoiceManager();
         serviceManager = new ServiceManager();
         sparePartDAO = new SparePartDAO();
         supplierDAO = new SupplierDAO();
 
-        // Inicializar controladores
+        // Inicializar controladores (sin inicializar supplierController todavía)
         serviceController = new ServiceController(serviceManager, serviceView, new DefaultTableModel());
         customerController = new CustomerController(customerManager, customerView, new DefaultTableModel());
         invoiceController = new InvoiceController(invoiceManager, invoiceView, new DefaultTableModel());
-        sparePartController = new SparePartController(inventoryView, sparePartDAO); // Inicializar con DAO
-        supplierController = new SupplierController(supplierView, supplierDAO);    // Inicializar con DAO
+        sparePartController = new SparePartController(null, sparePartDAO);
 
         // Pantalla de bienvenida
         JPanel welcomePanel = createWelcomePanel();
@@ -82,13 +85,11 @@ public class WelcomeScreen {
         JPanel invoicePanel = createInvoicePanel();
         cardPanel.add(invoicePanel, "invoices");
 
-        JPanel inventoryPanel = createInventoryPanel();
-        cardPanel.add(inventoryPanel, "inventory");
-
-        JPanel suppliersPanel = createSuppliersPanel();
-        cardPanel.add(suppliersPanel, "suppliers");
-
         frame.add(cardPanel, BorderLayout.CENTER);
+        frame.setVisible(true);
+    }
+
+    public void showMainWindow() {
         frame.setVisible(true);
     }
 
@@ -97,51 +98,70 @@ public class WelcomeScreen {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2d = (Graphics2D) g;
-                GradientPaint gp = new GradientPaint(0, 0, new Color(0, 120, 215), 0, getHeight(), new Color(0, 60, 120));
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                GradientPaint gp = new GradientPaint(0, 0, new Color(227, 242, 253), 0, getHeight(), new Color(255, 255, 255));
                 g2d.setPaint(gp);
                 g2d.fillRect(0, 0, getWidth(), getHeight());
             }
         };
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        panel.setBorder(BorderFactory.createEmptyBorder(30, 50, 30, 50));
 
-        JLabel titleLabel = new JLabel("Bienvenido a CarMotors", SwingConstants.CENTER);
-        titleLabel.setForeground(Color.WHITE);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
+        // Título
+        JLabel titleLabel = new JLabel("CarMotors", CENTER);
+        titleLabel.setForeground(new Color(33, 33, 33));
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 36));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
         panel.add(titleLabel, BorderLayout.NORTH);
 
-        JLabel descriptionLabel = new JLabel("<html><center>Gestión de Servicios Automotrices<br>Seleccione una sección para comenzar</center></html>", SwingConstants.CENTER);
-        descriptionLabel.setForeground(Color.WHITE);
-        descriptionLabel.setFont(new Font("Arial", Font.PLAIN, 16));
+        // Descripción
+        JLabel descriptionLabel = new JLabel("<html><center>Sistema de Gestión Automotriz<br>Selecciona una opción para comenzar</center></html>", CENTER);
+        descriptionLabel.setForeground(new Color(66, 66, 66));
+        descriptionLabel.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        descriptionLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 30, 0));
         panel.add(descriptionLabel, BorderLayout.CENTER);
 
-        JPanel buttonPanel = new JPanel(new GridLayout(5, 1, 10, 20));
+        // Panel de botones
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
         buttonPanel.setOpaque(false);
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 100, 0, 100));
 
-        JButton servicesButton = createStyledButton("Gestión de Servicios");
-        JButton customersButton = createStyledButton("Gestión de Clientes");
-        JButton invoicesButton = createStyledButton("Gestión de Facturas");
-        JButton inventoryButton = createStyledButton("Gestión de Inventario");
-        JButton suppliersButton = createStyledButton("Gestión de Proveedores");
+        JButton inventoryButton = createStyledButton("Gestión de Inventarios", "📦");
+        JButton servicesButton = createStyledButton("Mantenimiento y Reparaciones", "🔧");
+        JButton customersButton = createStyledButton("Clientes y Facturación", "👥");
+        JButton suppliersButton = createStyledButton("Proveedores y Compras", "🏬");
+        JButton reportsButton = createStyledButton("Reportes y Estadísticas", "📊");
+
+        inventoryButton.addActionListener(e -> {
+            inventoryView = new SparePartView(frame);
+            sparePartController.setView(inventoryView);
+            inventoryView.setVisible(true);
+            frame.setVisible(false);
+        });
 
         servicesButton.addActionListener(e -> cardLayout.show(cardPanel, "services"));
+
         customersButton.addActionListener(e -> cardLayout.show(cardPanel, "customers"));
-        invoicesButton.addActionListener(e -> cardLayout.show(cardPanel, "invoices"));
-        inventoryButton.addActionListener(e -> {
-            inventoryView = new SparePartView();
-            inventoryView.setVisible(true);
-            cardLayout.show(cardPanel, "inventory");
-        });
+
         suppliersButton.addActionListener(e -> {
-            supplierView = new SupplierView();
+            supplierController = new SupplierController(null, supplierDAO); // Crear controlador aquí
+            supplierView = new SupplierView(frame, supplierController); // Pasar el controlador a SupplierView
+            supplierController.setView(supplierView); // Actualizar la vista en el controlador
             supplierView.setVisible(true);
-            cardLayout.show(cardPanel, "suppliers");
+            frame.setVisible(false);
         });
 
-        buttonPanel.add(servicesButton);
-        buttonPanel.add(customersButton);
-        buttonPanel.add(invoicesButton);
+        reportsButton.addActionListener(e -> JOptionPane.showMessageDialog(frame, "Reportes y Estadísticas: Funcionalidad en desarrollo"));
+
         buttonPanel.add(inventoryButton);
+        buttonPanel.add(Box.createVerticalStrut(15));
+        buttonPanel.add(servicesButton);
+        buttonPanel.add(Box.createVerticalStrut(15));
+        buttonPanel.add(customersButton);
+        buttonPanel.add(Box.createVerticalStrut(15));
         buttonPanel.add(suppliersButton);
+        buttonPanel.add(Box.createVerticalStrut(15));
+        buttonPanel.add(reportsButton);
 
         panel.add(buttonPanel, BorderLayout.SOUTH);
         return panel;
@@ -150,8 +170,7 @@ public class WelcomeScreen {
     private JPanel createServicePanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(new Color(255, 240, 240));
-
-        JLabel title = new JLabel("Gestión de Servicios", SwingConstants.CENTER);
+        JLabel title = new JLabel("Gestión de Servicios", CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 20));
         panel.add(title, BorderLayout.NORTH);
 
@@ -167,7 +186,7 @@ public class WelcomeScreen {
 
         serviceController = new ServiceController(serviceManager, serviceView, tableModel);
 
-        JButton backButton = createStyledButton("Regresar");
+        JButton backButton = createStyledButton("Regresar", "⬅");
         backButton.addActionListener(e -> cardLayout.show(cardPanel, "welcome"));
 
         JPanel buttonPanel = new JPanel(new FlowLayout());
@@ -188,7 +207,7 @@ public class WelcomeScreen {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(new Color(240, 255, 240));
 
-        JLabel title = new JLabel("Gestión de Clientes", SwingConstants.CENTER);
+        JLabel title = new JLabel("Gestión de Clientes", CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 20));
         panel.add(title, BorderLayout.NORTH);
 
@@ -204,7 +223,7 @@ public class WelcomeScreen {
 
         customerController = new CustomerController(customerManager, customerView, tableModel);
 
-        JButton backButton = createStyledButton("Regresar");
+        JButton backButton = createStyledButton("Regresar", "⬅");
         backButton.addActionListener(e -> cardLayout.show(cardPanel, "welcome"));
 
         JPanel buttonPanel = new JPanel(new FlowLayout());
@@ -225,7 +244,7 @@ public class WelcomeScreen {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(new Color(240, 240, 255));
 
-        JLabel title = new JLabel("Gestión de Facturas", SwingConstants.CENTER);
+        JLabel title = new JLabel("Gestión de Facturas", CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 20));
         panel.add(title, BorderLayout.NORTH);
 
@@ -241,7 +260,7 @@ public class WelcomeScreen {
 
         invoiceController = new InvoiceController(invoiceManager, invoiceView, tableModel);
 
-        JButton backButton = createStyledButton("Regresar");
+        JButton backButton = createStyledButton("Regresar", "⬅");
         backButton.addActionListener(e -> cardLayout.show(cardPanel, "welcome"));
 
         JPanel buttonPanel = new JPanel(new FlowLayout());
@@ -258,73 +277,61 @@ public class WelcomeScreen {
         return panel;
     }
 
-    private JPanel createInventoryPanel() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(new Color(255, 255, 240));
-
-        JLabel title = new JLabel("Gestión de Inventario", SwingConstants.CENTER);
-        title.setFont(new Font("Arial", Font.BOLD, 20));
-        panel.add(title, BorderLayout.NORTH);
-
-        // Envolver el JFrame en un JPanel para integrarlo al CardLayout
-        JPanel wrapperPanel = new JPanel(new BorderLayout());
-        inventoryView.setVisible(true);
-        inventoryView.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // Evitar que cierre la aplicación
-        wrapperPanel.add(inventoryView.getContentPane(), BorderLayout.CENTER);
-
-        panel.add(wrapperPanel, BorderLayout.CENTER);
-
-        JButton backButton = createStyledButton("Regresar");
-        backButton.addActionListener(e -> {
-            cardLayout.show(cardPanel, "welcome");
-            inventoryView.dispose(); // Liberar recursos al volver
-        });
-
-        JPanel buttonPanel = new JPanel(new FlowLayout());
-        buttonPanel.add(backButton);
-        panel.add(buttonPanel, BorderLayout.SOUTH);
-
-        return panel;
-    }
-
-    private JPanel createSuppliersPanel() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(new Color(240, 255, 255));
-
-        JLabel title = new JLabel("Gestión de Proveedores", SwingConstants.CENTER);
-        title.setFont(new Font("Arial", Font.BOLD, 20));
-        panel.add(title, BorderLayout.NORTH);
-
-        // Envolver el JFrame en un JPanel para integrarlo al CardLayout
-        JPanel wrapperPanel = new JPanel(new BorderLayout());
-        supplierView.setVisible(true);
-        supplierView.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // Evitar que cierre la aplicación
-        wrapperPanel.add(supplierView.getContentPane(), BorderLayout.CENTER);
-
-        panel.add(wrapperPanel, BorderLayout.CENTER);
-
-        JButton backButton = createStyledButton("Regresar");
-        backButton.addActionListener(e -> {
-            cardLayout.show(cardPanel, "welcome");
-            supplierView.dispose(); // Liberar recursos al volver
-        });
-
-        JPanel buttonPanel = new JPanel(new FlowLayout());
-        buttonPanel.add(backButton);
-        panel.add(buttonPanel, BorderLayout.SOUTH);
-
-        return panel;
-    }
-
-    private JButton createStyledButton(String text) {
-        JButton button = new JButton(text);
-        button.setBackground(new Color(0, 120, 215));
+    private JButton createStyledButton(String text, String icon) {
+        JButton button = new JButton("<html><center>" + icon + "<br>" + text + "</center></html>");
+        button.setBackground(new Color(25, 118, 210));
         button.setForeground(Color.WHITE);
         button.setFocusPainted(false);
-        button.setFont(new Font("Arial", Font.BOLD, 16));
-        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        button.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        button.setBorder(new RoundedBorder(15));
+        button.setPreferredSize(new Dimension(300, 80));
+        button.setVerticalTextPosition(CENTER);
+        button.setHorizontalTextPosition(CENTER);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        // Efecto hover
+        button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                button.setBackground(new Color(66, 165, 245));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                button.setBackground(new Color(25, 118, 210));
+            }
+        });
+
         return button;
+    }
+
+    // Clase para borde redondeado
+    static class RoundedBorder extends AbstractBorder {
+        private final int radius;
+
+        RoundedBorder(int radius) {
+            this.radius = radius;
+        }
+
+        @Override
+        public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
+            Graphics2D g2d = (Graphics2D) g;
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2d.setColor(new Color(100, 100, 100, 50));
+            g2d.draw(new RoundRectangle2D.Double(x, y, width - 1, height - 1, radius, radius));
+        }
+
+        @Override
+        public Insets getBorderInsets(Component c) {
+            return new Insets(radius / 2, radius, radius / 2, radius);
+        }
+
+        @Override
+        public Insets getBorderInsets(Component c, Insets insets) {
+            insets.left = insets.right = radius;
+            insets.top = insets.bottom = radius / 2;
+            return insets;
+        }
     }
 
     public static void main(String[] args) {
