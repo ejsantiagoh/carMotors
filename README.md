@@ -47,3 +47,11 @@ Automotive service management system.
 - Optimized database queries in `SparePartDAO` to improve performance for large inventories.
 - Updated `docs/classes.md` with new service and controller classes and documented their responsibilities.
 - Conducted testing on supplier and spare parts modules, fixing bugs related to data persistence and UI updates.
+
+### Day 4 (Eimer) 
+- Integrated Laia's Day 3 work (inventory management and data enhancements) into the main application.
+- Developed ReportView to provide basic statistics (total clients, revenue, services) using existing data.
+- Updated WelcomeScreen.java with dynamic button logic for "Clientes" and "Facturación" tabs.
+- Fixed compilation issues and ensured seamless navigation across all sections.
+- Conducted testing to verify functionality across customers, invoicing, services, and reports.
+

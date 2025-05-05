@@ -4,48 +4,26 @@
  */
 package main.java.com.carmotors.inventory;
 
-/*
- *
- * @author yorle
- */
+import main.java.com.carmotors.common.DatabaseConnection;
 
-// Spare Part DAO
-
-import java.io.InputStream;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
+/**
+ * @author yorle
+ */
 public class SparePartDAO {
-    private String url;
-    private String username;
-    private String password;
+    private Connection conn;
 
     public SparePartDAO() {
-        // Cargar las propiedades desde database.properties
-        try (InputStream input = getClass().getClassLoader().getResourceAsStream("config/database.properties")) {
-            Properties props = new Properties();
-            if (input == null) {
-                throw new RuntimeException("No se pudo encontrar el archivo database.properties en el classpath");
-            }
-            props.load(input);
-            this.url = props.getProperty("db.url");
-            this.username = props.getProperty("db.username");
-            this.password = props.getProperty("db.password");
-
-            if (url == null || username == null || password == null) {
-                throw new RuntimeException("Faltan propiedades en database.properties: db.url, db.username o db.password");
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Error al cargar las propiedades de la base de datos: " + e.getMessage(), e);
-        }
+        // Usar DatabaseConnection para obtener la conexión
+        this.conn = DatabaseConnection.getInstance().getConnection();
     }
 
     public void saveSparePart(SparePart sparePart) throws SQLException {
         String sql = "INSERT INTO spare_part (name, type, brand, model, supplier_id, stock_quantity, minimum_stock, estimated_lifespan, status, batch_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try (Connection conn = DriverManager.getConnection(url, username, password);
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, sparePart.getName());
             pstmt.setString(2, sparePart.getType());
             pstmt.setString(3, sparePart.getBrand());
@@ -65,8 +43,7 @@ public class SparePartDAO {
     public List<SparePart> getAllSpareParts() throws SQLException {
         List<SparePart> spareParts = new ArrayList<>();
         String sql = "SELECT name, type, brand, model, supplier_id, stock_quantity, minimum_stock, estimated_lifespan, status, batch_id FROM spare_part";
-        try (Connection conn = DriverManager.getConnection(url, username, password);
-             Statement stmt = conn.createStatement();
+        try (Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 SparePart sp = new SparePart(

@@ -4,29 +4,36 @@
  */
 package main.java.com.carmotors.customers;
 
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.BorderLayout;
+import java.awt.Font;
 import java.awt.GridLayout;
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 
 /**
  *
  * @author fashe
  */
 
-
 public class CustomerView extends JPanel {
-    private JTextArea customerList;
+    private JTable customerTable;
+    private DefaultTableModel tableModel;
     private JButton refreshButton;
 
     public CustomerView() {
         setLayout(new BorderLayout());
 
-        customerList = new JTextArea(10, 50);
-        customerList.setEditable(false);
-        JScrollPane scrollPane = new JScrollPane(customerList);
+        String[] columnNames = {"ID", "Nombre", "Identificación", "Teléfono", "Email", "Dirección"};
+        tableModel = new DefaultTableModel(columnNames, 0);
+        customerTable = new JTable(tableModel);
+        customerTable.setFillsViewportHeight(true);
+        customerTable.setFont(new Font("Arial", Font.PLAIN, 12));
+        customerTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        customerTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        for (int i = 0; i < customerTable.getColumnCount(); i++) {
+            customerTable.getColumnModel().getColumn(i).setPreferredWidth(140);
+        }
+        JScrollPane scrollPane = new JScrollPane(customerTable);
         add(scrollPane, BorderLayout.CENTER);
 
         JPanel buttonPanel = new JPanel(new GridLayout(1, 1));
@@ -35,8 +42,8 @@ public class CustomerView extends JPanel {
         add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    public void setCustomerList(String customers) {
-        customerList.setText(customers);
+    public DefaultTableModel getTableModel() {
+        return tableModel;
     }
 
     public JButton getRefreshButton() {

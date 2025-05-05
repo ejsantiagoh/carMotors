@@ -18,6 +18,8 @@ import main.java.com.carmotors.suppliers.SupplierDAO;
 
 import javax.swing.*;
 import javax.swing.border.AbstractBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -49,13 +51,15 @@ public class WelcomeScreen {
     public WelcomeScreen() {
         frame = new JFrame("CarMotors - Gestión de Servicios");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(800, 600);
+        frame.setSize(900, 600);
+        frame.setMinimumSize(new Dimension(800, 500));
+        frame.setMaximumSize(new Dimension(1200, 800));
         frame.setLocationRelativeTo(null);
+        frame.setResizable(true);
 
         cardLayout = new CardLayout();
         cardPanel = new JPanel(cardLayout);
 
-        // Inicializar managers, vistas y DAO
         serviceView = new ServiceView();
         customerView = new CustomerView();
         invoiceView = new InvoiceView();
@@ -65,22 +69,19 @@ public class WelcomeScreen {
         sparePartDAO = new SparePartDAO();
         supplierDAO = new SupplierDAO();
 
-        // Inicializar controladores (sin inicializar supplierController todavía)
-        serviceController = new ServiceController(serviceManager, serviceView, new DefaultTableModel());
-        customerController = new CustomerController(customerManager, customerView, new DefaultTableModel());
-        invoiceController = new InvoiceController(invoiceManager, invoiceView, new DefaultTableModel());
+        serviceController = new ServiceController(serviceManager, serviceView, serviceView.getTableModel());
+        customerController = new CustomerController(customerManager, customerView, customerView.getTableModel());
+        invoiceController = new InvoiceController(invoiceManager, invoiceView, invoiceView.getTableModel());
         sparePartController = new SparePartController(null, sparePartDAO);
 
-        // Pantalla de bienvenida
         JPanel welcomePanel = createWelcomePanel();
         cardPanel.add(welcomePanel, "welcome");
 
-        // Añadir paneles
         JPanel servicePanel = createServicePanel();
         cardPanel.add(servicePanel, "services");
 
-        JPanel customerPanel = createCustomerPanel();
-        cardPanel.add(customerPanel, "customers");
+        JPanel customerInvoicePanel = createCustomerInvoicePanel();
+        cardPanel.add(customerInvoicePanel, "customers");
 
         JPanel invoicePanel = createInvoicePanel();
         cardPanel.add(invoicePanel, "invoices");
@@ -106,21 +107,18 @@ public class WelcomeScreen {
         };
         panel.setBorder(BorderFactory.createEmptyBorder(30, 50, 30, 50));
 
-        // Título
         JLabel titleLabel = new JLabel("CarMotors", CENTER);
         titleLabel.setForeground(new Color(33, 33, 33));
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 36));
         titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
         panel.add(titleLabel, BorderLayout.NORTH);
 
-        // Descripción
         JLabel descriptionLabel = new JLabel("<html><center>Sistema de Gestión Automotriz<br>Selecciona una opción para comenzar</center></html>", CENTER);
         descriptionLabel.setForeground(new Color(66, 66, 66));
         descriptionLabel.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         descriptionLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 30, 0));
         panel.add(descriptionLabel, BorderLayout.CENTER);
 
-        // Panel de botones
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
         buttonPanel.setOpaque(false);
@@ -144,14 +142,16 @@ public class WelcomeScreen {
         customersButton.addActionListener(e -> cardLayout.show(cardPanel, "customers"));
 
         suppliersButton.addActionListener(e -> {
-            supplierController = new SupplierController(null, supplierDAO); // Crear controlador aquí
-            supplierView = new SupplierView(frame, supplierController); // Pasar el controlador a SupplierView
-            supplierController.setView(supplierView); // Actualizar la vista en el controlador
+            supplierController = new SupplierController(null, supplierDAO);
+            supplierView = new SupplierView(frame, supplierController);
+            supplierController.setView(supplierView);
             supplierView.setVisible(true);
             frame.setVisible(false);
         });
 
-        reportsButton.addActionListener(e -> JOptionPane.showMessageDialog(frame, "Reportes y Estadísticas: Funcionalidad en desarrollo"));
+        reportsButton.addActionListener(e -> {
+            new ReportView(frame, customerView, invoiceView, serviceView).setVisible(true);
+        });
 
         buttonPanel.add(inventoryButton);
         buttonPanel.add(Box.createVerticalStrut(15));
@@ -170,32 +170,31 @@ public class WelcomeScreen {
     private JPanel createServicePanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(new Color(255, 240, 240));
-        JLabel title = new JLabel("Gestión de Servicios", CENTER);
+        JLabel title = new JLabel("Gestión de Mantenimiento y Reparación", CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 20));
         panel.add(title, BorderLayout.NORTH);
 
-        String[] columnNames = {"ID", "Tipo", "Vehículo ID", "Descripción", "Tiempo Estimado (horas)", "Costo Labor ($)", "Estado"};
-        DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
-        JTable table = new JTable(tableModel);
+        JTable table = new JTable(serviceView.getTableModel());
         table.setFillsViewportHeight(true);
         table.setFont(new Font("Arial", Font.PLAIN, 12));
         table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        for (int i = 0; i < table.getColumnCount(); i++) {
+            table.getColumnModel().getColumn(i).setPreferredWidth(120);
+        }
+
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        scrollPane.setPreferredSize(new Dimension(850, 400));
+        scrollPane.setMinimumSize(new Dimension(750, 300));
         panel.add(scrollPane, BorderLayout.CENTER);
 
-        serviceController = new ServiceController(serviceManager, serviceView, tableModel);
-
-        JButton backButton = createStyledButton("Regresar", "⬅");
+        JButton backButton = createStyledButton("Regresar", new Color(25, 118, 210), 150, 30);
         backButton.addActionListener(e -> cardLayout.show(cardPanel, "welcome"));
 
         JPanel buttonPanel = new JPanel(new FlowLayout());
-        if (serviceView != null && serviceView.getRefreshButton() != null) {
+        if (serviceView.getRefreshButton() != null) {
             buttonPanel.add(serviceView.getRefreshButton());
-        } else {
-            JButton placeholder = new JButton("Actualizar Servicios (Error)");
-            placeholder.setEnabled(false);
-            buttonPanel.add(placeholder);
         }
         buttonPanel.add(backButton);
         panel.add(buttonPanel, BorderLayout.SOUTH);
@@ -203,37 +202,77 @@ public class WelcomeScreen {
         return panel;
     }
 
-    private JPanel createCustomerPanel() {
+    private JPanel createCustomerInvoicePanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(new Color(240, 255, 240));
 
-        JLabel title = new JLabel("Gestión de Clientes", CENTER);
+        JLabel title = new JLabel("Gestión de Clientes y Facturación", CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 20));
         panel.add(title, BorderLayout.NORTH);
 
-        String[] columnNames = {"ID", "Nombre", "Identificación", "Teléfono", "Email", "Dirección"};
-        DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
-        JTable table = new JTable(tableModel);
-        table.setFillsViewportHeight(true);
-        table.setFont(new Font("Arial", Font.PLAIN, 12));
-        table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
-        JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        panel.add(scrollPane, BorderLayout.CENTER);
+        JTabbedPane tabbedPane = new JTabbedPane();
+        tabbedPane.setFont(new Font("Arial", Font.PLAIN, 14));
 
-        customerController = new CustomerController(customerManager, customerView, tableModel);
+        // Pestaña de Clientes
+        JPanel customerPanel = new JPanel(new BorderLayout());
+        JTable customerTable = new JTable(customerView.getTableModel());
+        customerTable.setFillsViewportHeight(true);
+        customerTable.setFont(new Font("Arial", Font.PLAIN, 12));
+        customerTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        customerTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        for (int i = 0; i < customerTable.getColumnCount(); i++) {
+            customerTable.getColumnModel().getColumn(i).setPreferredWidth(140);
+        }
+        JScrollPane customerScrollPane = new JScrollPane(customerTable);
+        customerScrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        customerScrollPane.setPreferredSize(new Dimension(850, 400));
+        customerScrollPane.setMinimumSize(new Dimension(750, 300));
+        customerPanel.add(customerScrollPane, BorderLayout.CENTER);
+        tabbedPane.addTab("Clientes", customerPanel);
 
-        JButton backButton = createStyledButton("Regresar", "⬅");
+        // Pestaña de Facturación
+        JPanel invoicePanel = new JPanel(new BorderLayout());
+        JTable invoiceTable = new JTable(invoiceView.getTableModel());
+        invoiceTable.setFillsViewportHeight(true);
+        invoiceTable.setFont(new Font("Arial", Font.PLAIN, 12));
+        invoiceTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        invoiceTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        for (int i = 0; i < invoiceTable.getColumnCount(); i++) {
+            invoiceTable.getColumnModel().getColumn(i).setPreferredWidth(90);
+        }
+        JScrollPane invoiceScrollPane = new JScrollPane(invoiceTable);
+        invoiceScrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        invoiceScrollPane.setPreferredSize(new Dimension(850, 400));
+        invoiceScrollPane.setMinimumSize(new Dimension(750, 300));
+        invoicePanel.add(invoiceScrollPane, BorderLayout.CENTER);
+        tabbedPane.addTab("Facturación", invoicePanel);
+
+        panel.add(tabbedPane, BorderLayout.CENTER);
+
+        JButton backButton = createStyledButton("Regresar", new Color(25, 118, 210), 150, 30);
         backButton.addActionListener(e -> cardLayout.show(cardPanel, "welcome"));
 
+        JButton updateButton = createStyledButton("Actualizar Clientes", new Color(25, 118, 210), 150, 30);
+        updateButton.addActionListener(e -> customerView.getRefreshButton().doClick());
+
+        tabbedPane.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                int selectedIndex = tabbedPane.getSelectedIndex();
+                if (selectedIndex == 0) {
+                    updateButton.setText("Actualizar Clientes");
+                    updateButton.removeActionListener(updateButton.getActionListeners()[0]);
+                    updateButton.addActionListener(ev -> customerView.getRefreshButton().doClick());
+                } else if (selectedIndex == 1) {
+                    updateButton.setText("Actualizar Facturación");
+                    updateButton.removeActionListener(updateButton.getActionListeners()[0]);
+                    updateButton.addActionListener(ev -> invoiceView.getRefreshButton().doClick());
+                }
+            }
+        });
+
         JPanel buttonPanel = new JPanel(new FlowLayout());
-        if (customerView != null && customerView.getRefreshButton() != null) {
-            buttonPanel.add(customerView.getRefreshButton());
-        } else {
-            JButton placeholder = new JButton("Actualizar Clientes (Error)");
-            placeholder.setEnabled(false);
-            buttonPanel.add(placeholder);
-        }
+        buttonPanel.add(updateButton);
         buttonPanel.add(backButton);
         panel.add(buttonPanel, BorderLayout.SOUTH);
 
@@ -248,9 +287,7 @@ public class WelcomeScreen {
         title.setFont(new Font("Arial", Font.BOLD, 20));
         panel.add(title, BorderLayout.NORTH);
 
-        String[] columnNames = {"ID", "Cliente ID", "Servicio ID", "Fecha", "Subtotal ($)", "Impuesto ($)", "Total ($)", "CUFE", "QR", "PDF"};
-        DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
-        JTable table = new JTable(tableModel);
+        JTable table = new JTable(invoiceView.getTableModel());
         table.setFillsViewportHeight(true);
         table.setFont(new Font("Arial", Font.PLAIN, 12));
         table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
@@ -258,18 +295,12 @@ public class WelcomeScreen {
         scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         panel.add(scrollPane, BorderLayout.CENTER);
 
-        invoiceController = new InvoiceController(invoiceManager, invoiceView, tableModel);
-
-        JButton backButton = createStyledButton("Regresar", "⬅");
+        JButton backButton = createStyledButton("Regresar", new Color(25, 118, 210), 150, 30);
         backButton.addActionListener(e -> cardLayout.show(cardPanel, "welcome"));
 
         JPanel buttonPanel = new JPanel(new FlowLayout());
-        if (invoiceView != null && invoiceView.getRefreshButton() != null) {
+        if (invoiceView.getRefreshButton() != null) {
             buttonPanel.add(invoiceView.getRefreshButton());
-        } else {
-            JButton placeholder = new JButton("Actualizar Facturas (Error)");
-            placeholder.setEnabled(false);
-            buttonPanel.add(placeholder);
         }
         buttonPanel.add(backButton);
         panel.add(buttonPanel, BorderLayout.SOUTH);
@@ -289,7 +320,6 @@ public class WelcomeScreen {
         button.setHorizontalTextPosition(CENTER);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        // Efecto hover
         button.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
@@ -305,7 +335,33 @@ public class WelcomeScreen {
         return button;
     }
 
-    // Clase para borde redondeado
+    private JButton createStyledButton(String text, Color backgroundColor, int width, int height) {
+        JButton button = new JButton(text);
+        button.setBackground(backgroundColor);
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        button.setBorder(new RoundedBorder(10));
+        button.setPreferredSize(new Dimension(width, height));
+        button.setVerticalTextPosition(CENTER);
+        button.setHorizontalTextPosition(CENTER);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                button.setBackground(new Color(66, 165, 245));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                button.setBackground(backgroundColor);
+            }
+        });
+
+        return button;
+    }
+
     static class RoundedBorder extends AbstractBorder {
         private final int radius;
 
