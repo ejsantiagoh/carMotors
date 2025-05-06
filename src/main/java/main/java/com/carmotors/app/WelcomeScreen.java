@@ -96,29 +96,29 @@ public class WelcomeScreen {
             protected void paintComponent(Graphics g) {
                 Graphics2D g2d = (Graphics2D) g;
                 g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                GradientPaint gp = new GradientPaint(0, 0, new Color(227, 242, 253), 0, getHeight(), new Color(255, 255, 255));
+                GradientPaint gp = new GradientPaint(0, 0, new Color(40, 50, 70), 0, getHeight(), new Color(70, 80, 100));
                 g2d.setPaint(gp);
                 g2d.fillRect(0, 0, getWidth(), getHeight());
             }
         };
-        panel.setBorder(BorderFactory.createEmptyBorder(30, 50, 30, 50));
+        panel.setBorder(BorderFactory.createEmptyBorder(50, 50, 50, 50));
 
         JLabel titleLabel = new JLabel("CarMotors", CENTER);
-        titleLabel.setForeground(new Color(33, 33, 33));
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 36));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
+        titleLabel.setForeground(Color.WHITE);
+        titleLabel.setFont(new Font("Arial Black", Font.BOLD, 40));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 40, 0));
         panel.add(titleLabel, BorderLayout.NORTH);
 
         JLabel descriptionLabel = new JLabel("<html><center>Sistema de Gestión Automotriz<br>Selecciona una opción para comenzar</center></html>", CENTER);
-        descriptionLabel.setForeground(new Color(66, 66, 66));
+        descriptionLabel.setForeground(new Color(200, 200, 200));
         descriptionLabel.setFont(new Font("Segoe UI", Font.PLAIN, 16));
-        descriptionLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 30, 0));
+        descriptionLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 50, 0));
         panel.add(descriptionLabel, BorderLayout.CENTER);
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
         buttonPanel.setOpaque(false);
-        buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 100, 0, 100));
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 120, 0, 120));
 
         JButton inventoryButton = createStyledButton("Gestión de Inventarios", "📦");
         JButton servicesButton = createStyledButton("Mantenimiento y Reparaciones", "🔧");
@@ -224,10 +224,20 @@ public class WelcomeScreen {
         customerScrollPane.setPreferredSize(new Dimension(850, 400));
         customerScrollPane.setMinimumSize(new Dimension(750, 300));
         customerPanel.add(customerScrollPane, BorderLayout.CENTER);
+
+        // Botones para la pestaña de Clientes
+        JButton refreshCustomerButton = createStyledButton("Actualizar Clientes", new Color(25, 118, 210), 150, 30);
+        refreshCustomerButton.addActionListener(e -> {
+            customerView.getTableModel().setRowCount(0);
+            customerManager.refreshCustomerList(customerView.getTableModel());
+        });
+        JPanel customerButtonPanel = new JPanel(new FlowLayout());
+        customerButtonPanel.add(refreshCustomerButton);
+        customerPanel.add(customerButtonPanel, BorderLayout.SOUTH);
+
         tabbedPane.addTab("Clientes", customerPanel);
 
         // Pestaña de Facturación
-        // Usar directamente invoiceView en lugar de reconstruir la tabla
         tabbedPane.addTab("Facturación", invoiceView);
 
         panel.add(tabbedPane, BorderLayout.CENTER);
@@ -235,33 +245,7 @@ public class WelcomeScreen {
         JButton backButton = createStyledButton("Regresar", new Color(25, 118, 210), 150, 30);
         backButton.addActionListener(e -> cardLayout.show(cardPanel, "welcome"));
 
-        JButton updateButton = createStyledButton("Actualizar Clientes", new Color(25, 118, 210), 150, 30);
-        updateButton.addActionListener(e -> {
-            customerView.getRefreshButton().doClick();
-        });
-
-        tabbedPane.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                int selectedIndex = tabbedPane.getSelectedIndex();
-                if (selectedIndex == 0) {
-                    updateButton.setText("Actualizar Clientes");
-                    updateButton.removeActionListener(updateButton.getActionListeners()[0]);
-                    updateButton.addActionListener(ev -> {
-                        customerView.getRefreshButton().doClick();
-                    });
-                } else if (selectedIndex == 1) {
-                    updateButton.setText("Actualizar Facturación");
-                    updateButton.removeActionListener(updateButton.getActionListeners()[0]);
-                    updateButton.addActionListener(ev -> {
-                        invoiceView.getRefreshButton().doClick();
-                    });
-                }
-            }
-        });
-
         JPanel buttonPanel = new JPanel(new FlowLayout());
-        buttonPanel.add(updateButton);
         buttonPanel.add(backButton);
         panel.add(buttonPanel, BorderLayout.SOUTH);
 
@@ -270,12 +254,12 @@ public class WelcomeScreen {
 
     private JButton createStyledButton(String text, String icon) {
         JButton button = new JButton("<html><center>" + icon + "<br>" + text + "</center></html>");
-        button.setBackground(new Color(25, 118, 210));
+        button.setBackground(new Color(0, 120, 215));
         button.setForeground(Color.WHITE);
         button.setFocusPainted(false);
-        button.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        button.setBorder(new RoundedBorder(15));
-        button.setPreferredSize(new Dimension(300, 80));
+        button.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        button.setBorder(new RoundedBorder(10));
+        button.setPreferredSize(new Dimension(250, 60));
         button.setVerticalTextPosition(CENTER);
         button.setHorizontalTextPosition(CENTER);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -283,12 +267,12 @@ public class WelcomeScreen {
         button.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                button.setBackground(new Color(66, 165, 245));
+                button.setBackground(new Color(0, 150, 255));
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                button.setBackground(new Color(25, 118, 210));
+                button.setBackground(new Color(0, 120, 215));
             }
         });
 

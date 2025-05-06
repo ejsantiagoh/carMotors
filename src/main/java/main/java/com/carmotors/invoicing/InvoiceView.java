@@ -2,6 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
+ 
 package main.java.com.carmotors.invoicing;
 
 import com.google.zxing.BarcodeFormat;
@@ -20,6 +21,7 @@ import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.io.image.ImageDataFactory;
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.File;
@@ -36,9 +38,9 @@ public class InvoiceView extends JPanel {
     private InvoiceManager invoiceManager;
 
     // Datos del taller
-    private static final String WORKSHOP_NAME = "Taller Automotriz Motores & Ruedas";
+    private static final String WORKSHOP_NAME = "Taller Automotriz CarMotors";
     private static final String WORKSHOP_NIT = "987654321-0";
-    private static final String WORKSHOP_ADDRESS = "Calle Principal #12-34, Medellín, Colombia";
+    private static final String WORKSHOP_ADDRESS = "Calle Principal #12-36, Bucaramanga, Colombia";
     private static final String WORKSHOP_CONTACT = "Tel: (604) 555-5678 | Email: info@carmotors.com";
     private static final String DIGITAL_SIGNATURE = "FirmaDigitalCarMotors2025";
 
@@ -229,7 +231,7 @@ public class InvoiceView extends JPanel {
 
         try {
             // Verificar permisos de escritura
-            File pdfDir = new File("pdfs");
+            File pdfDir = new File(pdfFile.getParent());
             if (!pdfDir.exists()) {
                 if (!pdfDir.mkdirs()) {
                     throw new IOException("No se pudo crear el directorio pdfs: " + pdfDir.getAbsolutePath());
@@ -347,31 +349,32 @@ public class InvoiceView extends JPanel {
     }
 
     private void downloadPdf(String cufe, int row) {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Selecciona dónde guardar el PDF");
         String fileName = "invoice_" + tableModel.getValueAt(row, 0) + ".pdf";
-        String pdfsDir = "pdfs";
-        String destinationPath = pdfsDir + File.separator + fileName;
+        fileChooser.setSelectedFile(new File(fileName));
+        fileChooser.setFileFilter(new FileNameExtensionFilter("Archivos PDF", "pdf"));
 
-        try {
-            File pdfsDirFile = new File(pdfsDir);
-            if (!pdfsDirFile.exists()) {
-                if (!pdfsDirFile.mkdirs()) {
-                    throw new IOException("No se pudo crear la carpeta pdfs: " + pdfsDirFile.getAbsolutePath());
+        int userSelection = fileChooser.showSaveDialog(this);
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            String destinationPath = fileChooser.getSelectedFile().getAbsolutePath();
+            if (!destinationPath.toLowerCase().endsWith(".pdf")) {
+                destinationPath += ".pdf";
+            }
+
+            try {
+                generatePdf(cufe, row, destinationPath);
+                File pdfFile = new File(destinationPath);
+                if (pdfFile.exists()) {
+                    JOptionPane.showMessageDialog(this, "PDF generado en: " + destinationPath);
+                } else {
+                    JOptionPane.showMessageDialog(this, "Error: El PDF no se generó en: " + destinationPath);
                 }
-                System.out.println("Carpeta pdfs creada manualmente: " + pdfsDirFile.getAbsolutePath());
+            } catch (Exception e) {
+                System.err.println("Error en downloadPdf: " + e.getMessage());
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Error al generar el PDF: " + e.getMessage());
             }
-
-            generatePdf(cufe, row, destinationPath);
-
-            File pdfFile = new File(destinationPath);
-            if (pdfFile.exists()) {
-                JOptionPane.showMessageDialog(this, "PDF generado en: " + destinationPath);
-            } else {
-                JOptionPane.showMessageDialog(this, "Error: El PDF no se generó en: " + destinationPath);
-            }
-        } catch (Exception e) {
-            System.err.println("Error en downloadPdf: " + e.getMessage());
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error al generar el PDF: " + e.getMessage());
         }
     }
 
