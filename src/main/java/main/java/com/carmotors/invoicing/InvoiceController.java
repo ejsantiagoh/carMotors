@@ -4,33 +4,24 @@
  */
 package main.java.com.carmotors.invoicing;
 
-import javax.swing.JOptionPane;
-import javax.swing.table.DefaultTableModel;
-
-/**
- *
- * @author fashe
- */
+import javax.swing.*;
 
 public class InvoiceController {
-    private final InvoiceManager invoiceManager;
-    private final InvoiceView invoiceView;
-    private final DefaultTableModel tableModel;
+    private InvoiceView view;
+    private InvoiceManager invoiceManager;
 
-    public InvoiceController(InvoiceManager invoiceManager, InvoiceView invoiceView, DefaultTableModel tableModel) {
-        this.invoiceManager = invoiceManager;
-        this.invoiceView = invoiceView;
-        this.tableModel = tableModel;
-        initController();
+    public InvoiceController(InvoiceView view) {
+        this.view = view;
+        this.invoiceManager = new InvoiceManager();
+        setupListeners();
+    }
+    
+
+    private void setupListeners() {
+        view.getRefreshButton().addActionListener(e -> refreshInvoices());
     }
 
-    private void initController() {
-        invoiceView.getRefreshButton().addActionListener(e -> {
-            try {
-                invoiceManager.refreshInvoiceList(tableModel);
-            } catch (RuntimeException ex) {
-                JOptionPane.showMessageDialog(null, "Error al listar facturas: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        });
+    public void refreshInvoices() {
+        invoiceManager.refreshInvoiceList(view.getTableModel());
     }
 }

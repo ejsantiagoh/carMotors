@@ -6,13 +6,7 @@ package main.java.com.carmotors.invoicing;
 
 import java.util.Date;
 
-/**
- *
- * @author fashe
- */
-
 public class Invoice {
-
     private int id;
     private int customerId;
     private int serviceId;
@@ -23,7 +17,12 @@ public class Invoice {
     private String cufeCode;
     private String qrCodeUrl;
     private String pdfUrl;
+    // Campos para información del cliente
+    private String customerName;
+    private String customerDocument;
+    private int customerAddressId; // Cambiado de String customerAddress a int customerAddressId
 
+    // Getters y Setters
     public int getId() {
         return id;
     }
@@ -102,5 +101,29 @@ public class Invoice {
 
     public void setPdfUrl(String pdfUrl) {
         this.pdfUrl = pdfUrl;
+    }
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
+
+    public String getCustomerDocument() {
+        return customerDocument;
+    }
+
+    public void setCustomerDocument(String customerDocument) {
+        this.customerDocument = customerDocument;
+    }
+
+    public int getCustomerAddressId() {
+        return customerAddressId;
+    }
+
+    public void setCustomerAddressId(int customerAddressId) {
+        this.customerAddressId = customerAddressId;
     }
 }

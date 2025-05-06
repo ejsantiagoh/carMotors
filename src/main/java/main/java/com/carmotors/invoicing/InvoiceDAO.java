@@ -13,15 +13,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * DAO para manejar operaciones de facturas en la base de datos.
  * @author fashe
  */
-
-
 public class InvoiceDAO {
     public List<Invoice> listInvoices() {
         List<Invoice> invoices = new ArrayList<>();
-        String sql = "SELECT * FROM invoice";
+        String sql = "SELECT i.id_invoice, i.customer_id, i.service_id, i.date, i.subtotal, i.tax, i.total, i.cufe_code, " +
+                    "c.name AS customer_name, c.identification AS customer_document, c.address_id AS customer_address_id " +
+                    "FROM invoice i " +
+                    "JOIN customer c ON i.customer_id = c.id_customer";
         try (Connection conn = DatabaseConnection.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -35,8 +36,10 @@ public class InvoiceDAO {
                 invoice.setTax(rs.getDouble("tax"));
                 invoice.setTotal(rs.getDouble("total"));
                 invoice.setCufeCode(rs.getString("cufe_code"));
-                invoice.setQrCodeUrl(rs.getString("qr_code_url"));
-                invoice.setPdfUrl(rs.getString("pdf_url"));
+                // Añadir información del cliente
+                invoice.setCustomerName(rs.getString("customer_name"));
+                invoice.setCustomerDocument(rs.getString("customer_document"));
+                invoice.setCustomerAddressId(rs.getInt("customer_address_id"));
                 invoices.add(invoice);
             }
         } catch (SQLException e) {

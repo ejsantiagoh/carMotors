@@ -4,13 +4,13 @@
  */
 package main.java.com.carmotors.invoicing;
 
-import java.util.List;
 import javax.swing.table.DefaultTableModel;
+import java.util.List;
+
 /**
- *
+ * Gestiona la lógica de negocio para facturas.
  * @author fashe
  */
-
 public class InvoiceManager {
     private final InvoiceDAO invoiceDAO;
 
@@ -23,7 +23,7 @@ public class InvoiceManager {
             List<Invoice> invoiceList = invoiceDAO.listInvoices();
             tableModel.setRowCount(0); // Limpiar la tabla
             if (invoiceList.isEmpty()) {
-                tableModel.addRow(new Object[]{"No hay facturas registradas.", "", "", "", "", "", "", "", "", ""});
+                tableModel.addRow(new Object[]{"No hay facturas registradas.", "", "", "", "", "", "", ""});
             } else {
                 for (Invoice invoice : invoiceList) {
                     tableModel.addRow(new Object[]{
@@ -34,15 +34,21 @@ public class InvoiceManager {
                         invoice.getSubtotal(),
                         invoice.getTax(),
                         invoice.getTotal(),
-                        invoice.getCufeCode(),
-                        invoice.getQrCodeUrl(),
-                        invoice.getPdfUrl()
+                        invoice.getCufeCode()
                     });
                 }
             }
         } catch (RuntimeException ex) {
             tableModel.setRowCount(0);
-            tableModel.addRow(new Object[]{"Error al listar facturas: " + ex.getMessage(), "", "", "", "", "", "", "", "", ""});
+            tableModel.addRow(new Object[]{"Error al listar facturas: " + ex.getMessage(), "", "", "", "", "", "", ""});
         }
+    }
+
+    public Invoice getInvoiceByRow(int row, DefaultTableModel tableModel) {
+        List<Invoice> invoiceList = invoiceDAO.listInvoices();
+        if (row >= 0 && row < invoiceList.size()) {
+            return invoiceList.get(row);
+        }
+        return null;
     }
 }
