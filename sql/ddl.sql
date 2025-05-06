@@ -71,7 +71,7 @@ CREATE TABLE reminder (
 
 -- Table for Supplier
 CREATE TABLE supplier (
-    id_supplier INT AUTO_INCREMENT PRIMARY KEY,
+    supplier_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     nit VARCHAR(50) NOT NULL UNIQUE,
     contact_info VARCHAR(255),
@@ -83,7 +83,7 @@ CREATE TABLE batch (
     id_batch INT AUTO_INCREMENT PRIMARY KEY,
     supplier_id INT NOT NULL,
     entry_date DATE NOT NULL,
-    FOREIGN KEY (supplier_id) REFERENCES supplier(id_supplier)
+    FOREIGN KEY (supplier_id) REFERENCES supplier(supplier_id)
 );
 
 -- Table for SparePart
@@ -99,7 +99,7 @@ CREATE TABLE spare_part (
     estimated_lifespan INT,
     status VARCHAR(20) NOT NULL,
     batch_id INT NOT NULL,
-    FOREIGN KEY (supplier_id) REFERENCES supplier(id_supplier),
+    FOREIGN KEY (supplier_id) REFERENCES supplier(supplier_id),
     FOREIGN KEY (batch_id) REFERENCES batch(id_batch)
 );
 
@@ -111,7 +111,7 @@ CREATE TABLE supplier_evaluation (
     quality_score INT NOT NULL CHECK (quality_score BETWEEN 1 AND 5),
     cost_score INT NOT NULL CHECK (cost_score BETWEEN 1 AND 5),
     evaluation_date DATE NOT NULL,
-    FOREIGN KEY (supplier_id) REFERENCES supplier(id_supplier)
+    FOREIGN KEY (supplier_id) REFERENCES supplier(supplier_id)
 );
 
 -- Table for ServiceDetail

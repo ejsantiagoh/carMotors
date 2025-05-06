@@ -109,7 +109,7 @@ public class SupplierController {
 
             SuppliedProduct product = new SuppliedProduct(type, quantity, supplyDate);
             dao.saveSuppliedProduct(supplier, product);
-            supplier.addSuppliedProduct(product);
+            supplier.addSuppliedProduct(product); 
             view.refreshProductTable(supplier);
             clearProductFields();
             JOptionPane.showMessageDialog(view, "Producto registrado con éxito");

@@ -8,7 +8,6 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.sql.SQLException;
 
 public class SupplierView extends JFrame {
@@ -42,25 +41,41 @@ public class SupplierView extends JFrame {
         setupButtonPanel();
         addComponents();
         refreshSupplierTable();
-        pack(); // Ajusta el tamaño del frame al contenido
+        pack(); // Ajusta el tamaño de la ventana al contenido
     }
 
     private void setupFrame() {
         setTitle("Gestión de Proveedores");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setMinimumSize(new Dimension(900, 700)); // Tamaño mínimo para asegurar visibilidad
+        setMinimumSize(new Dimension(700, 500)); // Tamaño mínimo razonable
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
     }
 
     private void setupMainPanel() {
-        JPanel mainPanel = new JPanel(new BorderLayout(5, 5)); // Reduje el espaciado
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Reduje los márgenes
+        JPanel mainPanel = new JPanel(new BorderLayout(5, 5));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         mainPanel.setBackground(new Color(240, 242, 245));
 
+        // Panel para el título y el promedio
+        JPanel northPanel = new JPanel();
+        northPanel.setLayout(new BoxLayout(northPanel, BoxLayout.Y_AXIS));
+        northPanel.setBackground(new Color(240, 242, 245));
+
         JLabel titleLabel = new JLabel("Gestión de Proveedores", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 18)); // Reduje el tamaño de la fuente
-        mainPanel.add(titleLabel, BorderLayout.NORTH);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        northPanel.add(titleLabel);
+
+        // Inicializar averageScoreLabel y añadirlo
+        averageScoreLabel = new JLabel("Puntuación Promedio: N/A");
+        averageScoreLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        averageScoreLabel.setForeground(new Color(25, 118, 210));
+        averageScoreLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        northPanel.add(Box.createVerticalStrut(5));
+        northPanel.add(averageScoreLabel);
+
+        mainPanel.add(northPanel, BorderLayout.NORTH);
+        // Añadir el mainPanel al JFrame
         add(mainPanel, BorderLayout.CENTER);
     }
 
@@ -73,7 +88,7 @@ public class SupplierView extends JFrame {
         combinedInputPanel.setLayout(new BoxLayout(combinedInputPanel, BoxLayout.Y_AXIS));
         combinedInputPanel.setBackground(Color.WHITE);
         combinedInputPanel.add(supplierInputPanel);
-        combinedInputPanel.add(Box.createVerticalStrut(5)); // Reduje el espacio vertical
+        combinedInputPanel.add(Box.createVerticalStrut(5));
         combinedInputPanel.add(productInputPanel);
         combinedInputPanel.add(Box.createVerticalStrut(5));
         combinedInputPanel.add(evaluationPanel);
@@ -85,7 +100,7 @@ public class SupplierView extends JFrame {
         GridBagConstraints gbc = setupGBC();
 
         addSectionLabel(panel, "Registrar Proveedor", gbc);
-        addTextField(panel, gbc, "Nombre:", nameField = new JTextField(15)); // Reduje el tamaño del campo
+        addTextField(panel, gbc, "Nombre:", nameField = new JTextField(15));
         addTextField(panel, gbc, "NIT:", nitField = new JTextField(15));
         addTextField(panel, gbc, "Contacto:", contactField = new JTextField(15));
         addComboBox(panel, gbc, "Frecuencia de Visitas:", visitFrequencyCombo = new JComboBox<>(new String[]{"Diaria", "Semanal", "Mensual", "Anual"}));
@@ -124,7 +139,7 @@ public class SupplierView extends JFrame {
 
     private GridBagConstraints setupGBC() {
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(3, 5, 3, 5); // Reduje los márgenes internos
+        gbc.insets = new Insets(5, 5, 1, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.WEST;
         return gbc;
@@ -132,11 +147,11 @@ public class SupplierView extends JFrame {
 
     private void addSectionLabel(JPanel panel, String text, GridBagConstraints gbc) {
         JLabel label = new JLabel(text);
-        label.setFont(new Font("Arial", Font.BOLD, 12)); // Reduje el tamaño de la fuente
+        label.setFont(new Font("Arial", Font.BOLD, 12));
         label.setForeground(new Color(25, 118, 210));
         gbc.gridx = 0;
         gbc.gridy = 0;
-        gbc.gridwidth = 2;
+        gbc.gridwidth = 10;
         panel.add(label, gbc);
         gbc.gridwidth = 1;
         gbc.gridy++;
@@ -146,10 +161,10 @@ public class SupplierView extends JFrame {
         gbc.gridx = 0;
         panel.add(new JLabel(labelText), gbc);
         gbc.gridx = 1;
-        textField.setFont(new Font("Arial", Font.PLAIN, 10)); // Reduje el tamaño de la fuente
+        textField.setFont(new Font("Arial", Font.PLAIN, 10));
         textField.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(200, 200, 200)),
-                BorderFactory.createEmptyBorder(3, 3, 3, 3))); // Reduje el padding
+                BorderFactory.createEmptyBorder(10, 3, 3, 3)));
         panel.add(textField, gbc);
         gbc.gridy++;
     }
@@ -158,7 +173,7 @@ public class SupplierView extends JFrame {
         gbc.gridx = 0;
         panel.add(new JLabel(labelText), gbc);
         gbc.gridx = 1;
-        comboBox.setFont(new Font("Arial", Font.PLAIN, 10)); // Reduje el tamaño de la fuente
+        comboBox.setFont(new Font("Arial", Font.PLAIN, 10));
         comboBox.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(200, 200, 200)),
                 BorderFactory.createEmptyBorder(3, 3, 3, 3)));
@@ -187,7 +202,7 @@ public class SupplierView extends JFrame {
 
     private void setupTableStyle(JTable table, String title) {
         table.setFillsViewportHeight(true);
-        table.setFont(new Font("Arial", Font.PLAIN, 10)); // Reduje el tamaño de la fuente
+        table.setFont(new Font("Arial", Font.PLAIN, 10));
         table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 10));
         table.getTableHeader().setBackground(new Color(25, 118, 210));
         table.getTableHeader().setForeground(Color.WHITE);
@@ -197,9 +212,9 @@ public class SupplierView extends JFrame {
                 title,
                 javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
                 javax.swing.border.TitledBorder.DEFAULT_POSITION,
-                new Font("Arial", Font.BOLD, 12), // Reduje el tamaño de la fuente
+                new Font("Arial", Font.BOLD, 12),
                 new Color(25, 118, 210)));
-        scrollPane.setPreferredSize(new Dimension(0, 120)); // Reduje la altura de las tablas
+        scrollPane.setPreferredSize(new Dimension(0, 120)); // Ajustado para dar más espacio a las tablas
     }
 
     private void setupButtonPanel() {
@@ -212,24 +227,48 @@ public class SupplierView extends JFrame {
 
         buttonPanel = new JPanel();
         buttonPanel.setBackground(new Color(240, 242, 245));
-        buttonPanel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0)); // Reduje los márgenes
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(1, 0, 5, 0));
         buttonPanel.add(backButton);
-        buttonPanel.setPreferredSize(new Dimension(0, 40)); // Reduje la altura
+        buttonPanel.setPreferredSize(new Dimension(0, 30));
     }
 
     private void addComponents() {
         JPanel mainPanel = (JPanel) getContentPane().getComponent(0);
         mainPanel.add(combinedInputPanel, BorderLayout.NORTH);
-        mainPanel.add(new JScrollPane(supplierTable), BorderLayout.CENTER);
-        mainPanel.add(new JScrollPane(productTable), BorderLayout.SOUTH);
-        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+        // Asegurarnos de que la tabla de proveedores sea visible
+        JScrollPane supplierScrollPane = new JScrollPane(supplierTable);
+        supplierScrollPane.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(new Color(25, 118, 210), 2),
+                "Proveedores Registrados",
+                javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+                javax.swing.border.TitledBorder.DEFAULT_POSITION,
+                new Font("Arial", Font.BOLD, 12),
+                new Color(25, 118, 210)));
+        supplierScrollPane.setPreferredSize(new Dimension(0, 120));
+        mainPanel.add(supplierScrollPane, BorderLayout.CENTER);
+
+        // Combinar la tabla de productos y el botón en un solo panel para SOUTH
+        JPanel southPanel = new JPanel(new BorderLayout());
+        JScrollPane productScrollPane = new JScrollPane(productTable);
+        productScrollPane.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(new Color(25, 118, 210), 2),
+                "Productos Suministrados",
+                javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+                javax.swing.border.TitledBorder.DEFAULT_POSITION,
+                new Font("Arial", Font.BOLD, 12),
+                new Color(25, 118, 210)));
+        productScrollPane.setPreferredSize(new Dimension(0, 120));
+        southPanel.add(productScrollPane, BorderLayout.CENTER);
+        southPanel.add(buttonPanel, BorderLayout.SOUTH);
+        mainPanel.add(southPanel, BorderLayout.SOUTH);
     }
 
     private void styleButton(JButton button) {
         button.setBackground(new Color(25, 118, 210));
         button.setForeground(Color.WHITE);
-        button.setFont(new Font("Arial", Font.BOLD, 12)); // Reduje el tamaño de la fuente
-        button.setBorder(BorderFactory.createEmptyBorder(5, 15, 5, 15)); // Reduje el padding
+        button.setFont(new Font("Arial", Font.BOLD, 12));
+        button.setBorder(BorderFactory.createEmptyBorder(5, 15, 5, 15));
         button.setFocusPainted(false);
         button.setOpaque(true);
         button.setBorderPainted(false);
@@ -258,10 +297,13 @@ public class SupplierView extends JFrame {
         productTableModel.setRowCount(0);
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
         for (SuppliedProduct product : supplier.getSuppliedProducts()) {
+            String formattedDate = product.getSupplyDate() != null 
+                ? sdf.format(product.getSupplyDate()) 
+                : "N/A";
             productTableModel.addRow(new Object[]{
-                    product.getType(),
-                    product.getQuantity(),
-                    sdf.format(product.getSupplyDate())
+                product.getType(),
+                product.getQuantity(),
+                formattedDate
             });
         }
     }
